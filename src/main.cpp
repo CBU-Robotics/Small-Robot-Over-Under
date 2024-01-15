@@ -8,7 +8,7 @@ const int RIGHT_Middle_MOTOR_PORT = 5;
 const int RIGHT_BOTTOM_MOTOR_PORT = 10;
 
 const int INTERTIAL_SENSOR_PORT = 4;
-const int VEX_MAX_VOLTAGE = 12000; // Maybe don't use. Has fried motors before.
+const int VEX_MAX_VOLTAGE = 12000; // Note: If motors have r10 board do not go above 10,000mV and switch directions.
 const int MAX_VOLTAGE = VEX_MAX_VOLTAGE - 2000;
 const int ANALOG_MAX_VALUE = 127;
 const double INTERPOLATION_MAGNITUDE = 0.01;
@@ -165,7 +165,25 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	/**
+	 * Dimensions Note: 
+	 * the robot's dimensions are about from center of wheel to center of wheel 10.5 by 10 and 3/8 inches.
+	 * Real dimensions are TODO: measure
+	 * 
+	 * TODO: Map out and write the autonomous instructions. Below is work in progress and subject to change.
+	 * The autonomous instructions should fufill the following:
+	 * 1. Move forward 44 inches
+	 * 2. Pivot 90 degrees left
+	 * 3. Move forward 47 inches
+	 * 4. Pivot 90 degrees right
+	 * 5. Dispense the pre-loaded triball into goal
+	 * 6. Delay until next triball is caught from other robots catapult throw
+	 * 7. Dispense the triball into goal
+	 * Repeat steps 6 and 7 until all triballs are dispensed
+	 * End autonomous
+	**/
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
