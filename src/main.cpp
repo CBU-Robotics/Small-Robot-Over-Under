@@ -16,8 +16,15 @@ const int INTERPOLATION_ERROR = 30;
 const double pi = 3.14159265358979323846;
 const int IMU_PORT = 14;
 
+//From the center of the wheel to the center of the other wheel
+const double length = 10.5;
+const double width = 10.375;
+
+//The diameter of the wheel
+const double diameter = 4.1;
+
 //The amount the left side needs to catch up to the right
-const double offset = 1.06;
+const double offset = 1.00;
 
 // Controller and motor setup
 pros::Controller master(pros::E_CONTROLLER_MASTER);
@@ -33,7 +40,7 @@ pros::Motor_Group left_group({ left_top_motor, left_middle_motor, left_bottom_mo
 pros::Motor_Group right_group({ right_top_motor, right_middle_motor, right_bottom_motor });
 
 // Inertial Sensor
-pros::Imu imu_sensor(14);
+pros::Imu imu_sensor(IMU_PORT);
 
 
 /******************************************************************************************************
@@ -44,7 +51,7 @@ pros::Imu imu_sensor(14);
 // Shaft Encoder
 pros::ADIEncoder encoder ('A', 'B', MOTOR_ENCODER_ROTATIONS);
 
-void move_distance(double voltage, double diameter, double distance) {
+void move_encoder(double voltage, double diameter, double distance) {
 	// Note: need to delay on start up or else it will not work
 	encoder.reset();
 
@@ -63,24 +70,16 @@ void move_distance(double voltage, double diameter, double distance) {
  * @param diameter: The diameter of the wheel.
  * @param distance: The distance that the robot will move.
  */
-void move_distance_motor(int voltage, double diameter, double distance) {
-	// Note: need to delay on start up or else it will not work
-	int left_top = left_top_motor.get_position();
-	int left_middle = left_middle_motor.get_position();
-	int left_bottom = left_bottom_motor.get_position();
-	int right_top = right_top_motor.get_position();
-	int right_middle = right_middle_motor.get_position();
-	int right_bottom = right_bottom_motor.get_position();
-	int average = 0;
+void move(int voltage, double distance) {
+	// need to delay on start up
+	double left_middle = left_middle_motor.get_position();
+	double right_middle = right_middle_motor.get_position();
+	double average = 0;
 
 	while(abs(average) < distance / (pi * diameter)) {
-		int lt_dif = left_top_motor.get_position() - left_top;
-		int lm_dif = left_middle_motor.get_position() - left_middle;
-		int lb_dif = left_bottom_motor.get_position() - left_bottom;
-		int rt_dif = right_top_motor.get_position() - right_top;
-		int rm_dif = right_middle_motor.get_position() - right_middle;
-		int rb_dif = right_bottom_motor.get_position() - right_bottom;
-		average = (lt_dif + lm_dif + lb_dif + rt_dif + rm_dif + rb_dif) / 6;
+		double lm_dif = left_middle_motor.get_position() - left_middle;
+		double rm_dif = right_middle_motor.get_position() - right_middle;
+		average = (lm_dif + rm_dif) / 2;
 		
 		left_group.move_voltage(voltage * offset);
 		right_group.move_voltage(voltage);
@@ -89,23 +88,51 @@ void move_distance_motor(int voltage, double diameter, double distance) {
 	right_group.brake();
 }
 
-bool autoTurn(int degrees, int voltage) {
-    int degreesTurned = 0;
+void turn_imu(int voltage, int rotation) {
     int initialIntertialRotation = (int) imu_sensor.get_rotation();
-  	while (!((degreesTurned < degrees + 3) && (degreesTurned > degrees - 3))) {
-      pros::lcd::print(2, "Degrees turned: %d\n", degreesTurned);
-      degreesTurned = abs(initialIntertialRotation - (int) imu_sensor.get_rotation());
-    if (voltage > 0) {
-        left_group.move_voltage(voltage);
-    } else {
-        right_group.move_voltage(-voltage);
-    }
-    pros::lcd::print(3, "IMU get rotation: %d degrees\n", (int) imu_sensor.get_rotation());
-		pros::delay(20);
+
+	rotation *= 0.84;
+
+	if (rotation > 0) {
+		while ((int) imu_sensor.get_rotation() - initialIntertialRotation < rotation) {
+			right_group.move_voltage(-voltage);
+			left_group.move_voltage(voltage);
+		}
+	} else {
+		while ((int) imu_sensor.get_rotation() - initialIntertialRotation > rotation) {
+			right_group.move_voltage(voltage);
+			left_group.move_voltage(-voltage);
+		}
 	}
-  left_group.brake();
-  right_group.brake();
-  return false;
+	
+	left_group.brake();
+	right_group.brake();
+}
+
+void turn(int voltage, int rotation) {
+	// need to delay on start up
+	double left_middle = left_middle_motor.get_position();
+	double right_middle = right_middle_motor.get_position();
+	double average = 0;
+
+	if (rotation < 0) {
+		voltage = -voltage;
+		rotation = -rotation;
+	}
+
+	//double distance = (rotation * pi * ((length * length) + (width * width))) / (720 * length);
+	double distance = (rotation * pi * length) / 360;
+
+	while(fabs(average) < (distance / (pi * diameter))) {
+		double lm_dif = left_middle_motor.get_position() - left_middle;
+		double rm_dif = right_middle_motor.get_position() - right_middle;
+		average = (fabs(lm_dif) + fabs(rm_dif)) / 2;
+		
+		left_group.move_voltage(voltage);
+		right_group.move_voltage(-voltage);
+	}
+	left_group.brake();
+	right_group.brake();
 }
 
 /**
@@ -166,6 +193,12 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
+	move(6000, 38.5);
+	turn_imu(3000, -90);
+	move(6000, 44);
+	turn_imu(3000, 90);
+	move(6000, 2);
+
 	/**
 	 * Dimensions Note: 
 	 * the robot's dimensions are about from center of wheel to center of wheel 10.5 by 10 and 3/8 inches.
@@ -199,6 +232,26 @@ void autonomous() {
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	// Tank Drive
+	/*
+	while (true) {
+		// Joystick input
+		int left = master.get_analog(ANALOG_LEFT_Y);
+		int right = master.get_analog(ANALOG_RIGHT_Y);
+
+		// Calculate motor voltages based on joystick input
+		int voltage_left = left * MAX_VOLTAGE / ANALOG_MAX_VALUE;
+		int voltage_right = right * MAX_VOLTAGE / ANALOG_MAX_VALUE;
+
+		// Apply interpolated motor voltages
+		left_group.move_voltage(voltage_left);
+		right_group.move_voltage(voltage_right);
+
+		pros::delay(20); // Delay for loop iteration
+	}
+	*/
+	
+	// Arcade Drive
 	while (true) {
 		// Joystick input
 		int x = master.get_analog(ANALOG_RIGHT_X);
