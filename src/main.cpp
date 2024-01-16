@@ -3,13 +3,13 @@
 const int LEFT_TOP_MOTOR_PORT = 11;
 const int LEFT_Middle_MOTOR_PORT = 15;
 const int LEFT_BOTTOM_MOTOR_PORT = 20;
-const int RIGHT_TOP_MOTOR_PORT = 1;
+const int RIGHT_TOP_MOTOR_PORT = 2;
 const int RIGHT_Middle_MOTOR_PORT = 5;
 const int RIGHT_BOTTOM_MOTOR_PORT = 10;
 
 const int INTERTIAL_SENSOR_PORT = 4;
 const int VEX_MAX_VOLTAGE = 12000; // Note: If motors have r10 board do not go above 10,000mV and switch directions.
-const int MAX_VOLTAGE = VEX_MAX_VOLTAGE - 2000;
+const int MAX_VOLTAGE = VEX_MAX_VOLTAGE - 0;
 const int ANALOG_MAX_VALUE = 127;
 const double INTERPOLATION_MAGNITUDE = 0.01;
 const int INTERPOLATION_ERROR = 30;
@@ -202,7 +202,7 @@ void opcontrol() {
 	while (true) {
 		// Joystick input
 		int x = master.get_analog(ANALOG_RIGHT_X);
-		int y = master.get_analog(ANALOG_RIGHT_Y);
+		int y = master.get_analog(ANALOG_LEFT_Y);
 
 		if (x == 0 && y == 0) {
 			// Stop motors if joystick is at the center
