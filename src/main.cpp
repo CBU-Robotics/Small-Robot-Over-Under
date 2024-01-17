@@ -1,5 +1,11 @@
 #include "main.h"
 
+/*
+* Dimensions Note: 
+* From center of wheel to center of wheel the robot is 10.5 x 10 & 3/8 inches.
+* Border dimensions are 14.5 x 13 inches.
+*/
+
 const int LEFT_TOP_MOTOR_PORT = 11;
 const int LEFT_Middle_MOTOR_PORT = 15;
 const int LEFT_BOTTOM_MOTOR_PORT = 20;
@@ -7,14 +13,15 @@ const int RIGHT_TOP_MOTOR_PORT = 2;
 const int RIGHT_Middle_MOTOR_PORT = 5;
 const int RIGHT_BOTTOM_MOTOR_PORT = 10;
 
-const int INTERTIAL_SENSOR_PORT = 4;
+const int IMU_PORT = 14; // Inertial Measurement Unit
+
 const int VEX_MAX_VOLTAGE = 12000; // Note: If motors have r10 board do not go above 10,000mV and switch directions.
 const int MAX_VOLTAGE = VEX_MAX_VOLTAGE - 0;
 const int ANALOG_MAX_VALUE = 127;
 const double INTERPOLATION_MAGNITUDE = 0.01;
 const int INTERPOLATION_ERROR = 30;
 const double pi = 3.14159265358979323846;
-const int IMU_PORT = 14;
+
 
 //From the center of the wheel to the center of the other wheel
 const double length = 10.5;
@@ -63,7 +70,7 @@ void move_encoder(double voltage, double diameter, double distance) {
 	right_group.brake();
 }
 
-/*
+/**
  * This function is used to move the robot a certain distance using the motor's built in encoders.
  * 
  * @param voltage: The voltage that the motors will be set to.
@@ -88,6 +95,12 @@ void move(int voltage, double distance) {
 	right_group.brake();
 }
 
+/**
+ * This function is used to turn the robot a certain amount of degrees using the inertial sensor.
+ * 
+ * @param voltage: The voltage that the motors will be set to.
+ * @param rotation: The amount of degrees that the robot will turn.
+ */
 void turn_imu(int voltage, int rotation) {
     int initialIntertialRotation = (int) imu_sensor.get_rotation();
 
@@ -109,6 +122,12 @@ void turn_imu(int voltage, int rotation) {
 	right_group.brake();
 }
 
+/**
+ * This function is used to turn the robot a certain amount of degrees using the motor's built in encoders.
+ * 
+ * @param voltage: The voltage that the motors will be set to.
+ * @param rotation: The amount of degrees that the robot will turn.
+ */
 void turn(int voltage, int rotation) {
 	// need to delay on start up
 	double left_middle = left_middle_motor.get_position();
@@ -181,28 +200,11 @@ void disabled() {}
 
 void competition_initialize() {}
 
-/**
- * Runs the user autonomous code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the autonomous
- * mode. Alternatively, this function may be called in initialize or opcontrol
- * for non-competition testing purposes.
- *
- * If the robot is disabled or communications is lost, the autonomous task
- * will be stopped. Re-enabling the robot will restart the task, not re-start it
- * from where it left off.
- */
 void autonomous() {
-	move(6000, 38.5);
-	turn_imu(3000, -90);
-	move(6000, 44);
-	turn_imu(3000, 90);
-	move(6000, 2);
-
 	/**
 	 * Dimensions Note: 
-	 * the robot's dimensions are about from center of wheel to center of wheel 10.5 by 10 and 3/8 inches.
-	 * Real dimensions are TODO: measure
+	 * the robot's dimensions are about from center of wheel to center of wheel 10.5 x 10 and 3/8 inches.
+	 * Real dimensions are 14.5 x 13 inches.
 	 * 
 	 * TODO: Map out and write the autonomous instructions. Below is work in progress and subject to change.
 	 * The autonomous instructions should fufill the following:
@@ -215,22 +217,15 @@ void autonomous() {
 	 * 7. Dispense the triball into goal
 	 * Repeat steps 6 and 7 until all triballs are dispensed
 	 * End autonomous
-	**/
+	 */
+	move(6000, 38.5);
+	turn_imu(3000, -90);
+	move(6000, 44);
+	turn_imu(3000, 90);
+	move(6000, 2);
+
 }
 
-/**
- * Runs the operator control code. This function will be started in its own task
- * with the default priority and stack size whenever the robot is enabled via
- * the Field Management System or the VEX Competition Switch in the operator
- * control mode.
- *
- * If no competition control is connected, this function will run immediately
- * following initialize().
- *
- * If the robot is disabled or communications is lost, the
- * operator control task will be stopped. Re-enabling the robot will restart the
- * task, not resume it from where it left off.
- */
 void opcontrol() {
 	// Tank Drive
 	/*
@@ -289,7 +284,6 @@ void opcontrol() {
 			// LCD display for debugging
 			pros::lcd::print(0, "%d %d %d", static_cast<int>(angle), static_cast<int>(voltage_x), static_cast<int>(voltage_y));
 		}
-
 		pros::delay(20); // Delay for loop iteration
 	}
 }
