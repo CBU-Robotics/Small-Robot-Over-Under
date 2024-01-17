@@ -6,16 +6,24 @@
 * Border dimensions are 14.5 x 13 inches.
 */
 
-const int LEFT_TOP_MOTOR_PORT = 11;
-const int LEFT_Middle_MOTOR_PORT = 15;
-const int LEFT_BOTTOM_MOTOR_PORT = 20;
-const int RIGHT_TOP_MOTOR_PORT = 2;
-const int RIGHT_Middle_MOTOR_PORT = 5;
-const int RIGHT_BOTTOM_MOTOR_PORT = 10;
+// Drivetrain motor ports
+const int LEFT_TOP_MOTOR_PORT = 20;
+const int LEFT_Middle_MOTOR_PORT = 19;
+const int LEFT_BOTTOM_MOTOR_PORT = 10;
+const int RIGHT_TOP_MOTOR_PORT = 11;
+const int RIGHT_Middle_MOTOR_PORT = 12;
+const int RIGHT_BOTTOM_MOTOR_PORT = 2;
+
+// Intake motor ports
+const int LEFT_INTAKE_MOTOR_PORT = 4;
+const int RIGHT_INTAKE_MOTOR_PORT = 5;
 
 const int IMU_PORT = 14; // Inertial Measurement Unit
 
-const int VEX_MAX_VOLTAGE = 12000; // Note: If motors have r10 board do not go above 10,000mV and switch directions.
+// Note: If motors have r10 board,
+// do not go above 10,000mV and switch directions.
+// We are trying to return and replace those motors.
+const int VEX_MAX_VOLTAGE = 12000;
 const int MAX_VOLTAGE = VEX_MAX_VOLTAGE - 0;
 const int ANALOG_MAX_VALUE = 127;
 const double INTERPOLATION_MAGNITUDE = 0.01;
@@ -41,10 +49,13 @@ pros::Motor left_bottom_motor(LEFT_BOTTOM_MOTOR_PORT, pros::E_MOTOR_GEAR_200, fa
 pros::Motor right_top_motor(RIGHT_TOP_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_ROTATIONS);
 pros::Motor right_middle_motor(RIGHT_Middle_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_ROTATIONS);
 pros::Motor right_bottom_motor(RIGHT_BOTTOM_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_ROTATIONS);
+pros::Motor left_intake_motor(LEFT_INTAKE_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_ROTATIONS);
+pros::Motor right_intake_motor(RIGHT_INTAKE_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_ROTATIONS);
 
 // Motor groups and brake modes
 pros::Motor_Group left_group({ left_top_motor, left_middle_motor, left_bottom_motor });
 pros::Motor_Group right_group({ right_top_motor, right_middle_motor, right_bottom_motor });
+pros::Motor_Group intake_group({ left_intake_motor, right_intake_motor });
 
 // Inertial Sensor
 pros::Imu imu_sensor(IMU_PORT);
@@ -283,6 +294,16 @@ void opcontrol() {
 
 			// LCD display for debugging
 			pros::lcd::print(0, "%d %d %d", static_cast<int>(angle), static_cast<int>(voltage_x), static_cast<int>(voltage_y));
+		}
+		// Intake control
+		if (master.get_digital(DIGITAL_L1)) { // Forward
+			intake_group.move_voltage(MAX_VOLTAGE);
+		}
+		else if (master.get_digital(DIGITAL_R1)) { // Reverse
+			intake_group.move_voltage(-MAX_VOLTAGE);
+		}
+		else {
+			intake_group.move_voltage(0);
 		}
 		pros::delay(20); // Delay for loop iteration
 	}
