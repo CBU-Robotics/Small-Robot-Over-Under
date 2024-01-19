@@ -69,19 +69,19 @@ pros::ADIDigitalOut piston ('A');
  * 
  *****************************************************************************************************/ 
 // Shaft Encoder
-pros::ADIEncoder encoder ('A', 'B', MOTOR_ENCODER_ROTATIONS);
+// pros::ADIEncoder encoder ('A', 'B', MOTOR_ENCODER_ROTATIONS);
 
-void move_encoder(double voltage, double diameter, double distance) {
-	// Note: need to delay on start up or else it will not work
-	encoder.reset();
+// void move_encoder(double voltage, double diameter, double distance) {
+// 	// Note: need to delay on start up or else it will not work
+// 	encoder.reset();
 
-	while((abs((int)encoder.get_value())) < distance / (diameter * pi)) {
-		left_group.move_voltage(voltage);
-		right_group.move_voltage(voltage);
-	}
-	left_group.brake();
-	right_group.brake();
-}
+// 	while((abs((int)encoder.get_value())) < distance / (diameter * pi)) {
+// 		left_group.move_voltage(voltage);
+// 		right_group.move_voltage(voltage);
+// 	}
+// 	left_group.brake();
+// 	right_group.brake();
+// }
 
 /**
  * This function is used to move the robot a certain distance using the motor's built-in encoders.
@@ -243,7 +243,11 @@ void autonomous() {
 	// turn_imu(3000, 90);
 	// move(6000, 2);
 
-	move(6000, diameter, 38.5, false);
+	move(5000, diameter, 36.25, true);
+	turn_imu(2000, -85);
+	move(5000, diameter, 38, true);
+	turn_imu(2000, 90);
+	// move(6000, diameter, 2, true);
 }
 
 void opcontrol() {
