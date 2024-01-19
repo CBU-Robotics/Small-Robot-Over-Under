@@ -72,72 +72,15 @@ double to_radians(double degrees) {
 	return pi * degrees / 180.;
 }
 
-void move_encoder(int voltage, double distance) {
+void move(int voltage, double distance) {
 	double v = left_middle_motor.get_position(); // if this is degrees
 	const double iv = v;
 	const double r = diameter / 2.;
 	while (dabs((iv - v) * r) < distance) {
-		pros::lcd::print(0, "%d %d %d", iv, v, r); 
 		left_group.move_voltage(voltage);
 		right_group.move_voltage(voltage);
+		v = left_middle_motor.get_position();
 	}
-}
-
-
-
-/**
- * This function is used to move the robot a certain distance using the motor's built-in encoders.
- * 
- * @param voltage: The voltage that the motors will be set to.
- * @param distance: The distance that the robot will move.
- * @param forward: If true, the robot will move forward; if false, it will move backward.
- */
-void move(int voltage, double distance, bool forward) {
-    // need to delay on start up
-    double left_middle = left_middle_motor.get_position();
-    double right_middle = right_middle_motor.get_position();
-    double average = 0;
-
-    int directionFactor = forward ? 1 : -1; // 1 for forward, -1 for backward
-
-    while (abs(average) < distance / (pi * diameter)) {
-        double lm_dif = left_middle_motor.get_position() - left_middle;
-        double rm_dif = right_middle_motor.get_position() - right_middle;
-        average = (lm_dif + rm_dif) / 2;
-
-        left_group.move_voltage(voltage * offset * directionFactor);
-        right_group.move_voltage(voltage * directionFactor);
-    }
-
-    left_group.brake();
-    right_group.brake();
-}
-
-/**
- * This function is used to turn the robot a certain amount of degrees using the inertial sensor.
- * 
- * @param voltage: The voltage that the motors will be set to.
- * @param rotation: The amount of degrees that the robot will turn.
- */
-void turn_imu(int voltage, int rotation) {
-    int initialIntertialRotation = (int) imu_sensor.get_rotation();
-
-	rotation *= 0.84;
-
-	if (rotation > 0) {
-		while ((int) imu_sensor.get_rotation() - initialIntertialRotation < rotation) {
-			right_group.move_voltage(-voltage);
-			left_group.move_voltage(voltage);
-		}
-	} else {
-		while ((int) imu_sensor.get_rotation() - initialIntertialRotation > rotation) {
-			right_group.move_voltage(voltage);
-			left_group.move_voltage(-voltage);
-		}
-	}
-	
-	left_group.brake();
-	right_group.brake();
 }
 
 /**
@@ -172,42 +115,6 @@ void turn(int voltage, int rotation) {
 	right_group.brake();
 }
 
-/**
- * @brief Linearly interpolates between two values.
- *
- * This function performs linear interpolation (lerp) between an initial value
- * and a target value based on a specified magnitude.
- *
- * @param initial_value The starting value.
- * @param target_value The target value to interpolate towards.
- * @param magnitude The magnitude of interpolation, typically in the range [0, 1].
- * @return The interpolated value as a 32-bit signed integer.
- */
-std::int32_t lerp(std::uint32_t initial_value, std::int32_t target_value, double magnitude) {
-	return static_cast<std::int32_t>((target_value - initial_value) * magnitude) + initial_value;
-}
-
-/**
- * @brief Linearly interpolates motor group voltage to a target value.
- *
- * Performs linear interpolation (lerp) of the voltage for a given motor group
- * towards a specified target voltage using a set interpolation magnitude.
- *
- * @param motor_group A reference to the `pros::Motor_Group` object to control.
- * @param target_voltage The desired target voltage for the motor group.
- */
-void interpolate_motor_voltage(pros::Motor_Group& motor_group, std::int32_t target_voltage) {
-	std::vector<std::uint32_t> voltages = motor_group.get_voltages();
-
-	if (abs(voltages[0] - target_voltage) < INTERPOLATION_ERROR) {
-		motor_group.move_voltage(target_voltage);
-	}
-	else {
-		motor_group.move_voltage(lerp(voltages[0], target_voltage, INTERPOLATION_MAGNITUDE));
-	}
-}
-
-
 void initialize() {
 	pros::lcd::initialize();
 	pros::ADIDigitalOut piston ('A', false);
@@ -238,7 +145,7 @@ void autonomous() {
 	 * End autonomous
 	 */
 	
-	move_encoder(5000, 36.25);
+	move(5000, 36.25);
 	// turn_imu(3000, -85);
 	// move(5000, diameter, 29);
 	// move(2000, diameter, 8);
@@ -248,25 +155,6 @@ void autonomous() {
 }
 
 void opcontrol() {
-	// Tank Drive
-	/*
-	while (true) {
-		// Joystick input
-		int left = master.get_analog(ANALOG_LEFT_Y);
-		int right = master.get_analog(ANALOG_RIGHT_Y);
-
-		// Calculate motor voltages based on joystick input
-		int voltage_left = left * MAX_VOLTAGE / ANALOG_MAX_VALUE;
-		int voltage_right = right * MAX_VOLTAGE / ANALOG_MAX_VALUE;
-
-		// Apply interpolated motor voltages
-		left_group.move_voltage(voltage_left);
-		right_group.move_voltage(voltage_right);
-
-		pros::delay(20); // Delay for loop iteration
-	}
-	*/
-	
 	// Arcade Drive
 	while (true) {
 		// Joystick input
@@ -283,8 +171,8 @@ void opcontrol() {
 		}
 		else {
 			// Calculate magnitude based on normalized x and y
-			double normalized_x = static_cast<double>(x) / 127.0;
-			double normalized_y = static_cast<double>(y) / 127.0;
+			double normalized_x = (double) x / 127.0;
+			double normalized_y = (double) y / 127.0;
 			double magnitude = sqrt(normalized_x * normalized_x + normalized_y * normalized_y);
 
 			// Calculate motor voltages based on joystick input
@@ -297,13 +185,8 @@ void opcontrol() {
 			int voltage_right = voltage_y - voltage_x;
 
 			// Apply interpolated motor voltages
-			// interpolate_motor_voltage(left_group, voltage_left);
-			// interpolate_motor_voltage(right_group, voltage_right);
 			left_group.move_voltage(voltage_left);
 			right_group.move_voltage(voltage_right);
-
-			// LCD display for debugging
-			pros::lcd::print(0, "%d %d %d", static_cast<int>(angle), static_cast<int>(voltage_x), static_cast<int>(voltage_y));
 		}
 
 		// Intake control
