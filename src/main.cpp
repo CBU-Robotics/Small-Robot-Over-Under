@@ -80,7 +80,7 @@ void move(int voltage, double distance) {
 		left_group.move_voltage(voltage);
 		right_group.move_voltage(voltage);
 		v = left_middle_motor.get_position();
-		pros::lcd::print(0, "%d %d %d", iv, v, r);
+		pros::lcd::print(0, "%f %f %f", iv, v, r);
 	}
 
 	left_group.brake();
