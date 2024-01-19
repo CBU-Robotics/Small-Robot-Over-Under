@@ -7,18 +7,18 @@
 */
 
 // Drivetrain motor ports
-const int LEFT_TOP_MOTOR_PORT = 20;
-const int LEFT_Middle_MOTOR_PORT = 19;
-const int LEFT_BOTTOM_MOTOR_PORT = 10;
-const int RIGHT_TOP_MOTOR_PORT = 11;
-const int RIGHT_Middle_MOTOR_PORT = 12;
-const int RIGHT_BOTTOM_MOTOR_PORT = 2;
+const int LEFT_TOP_MOTOR_PORT = 19;
+const int LEFT_Middle_MOTOR_PORT = 20; // Middle Wheel
+const int LEFT_BOTTOM_MOTOR_PORT = 18;
+const int RIGHT_TOP_MOTOR_PORT = 12;
+const int RIGHT_Middle_MOTOR_PORT = 11; // Middle Wheel
+const int RIGHT_BOTTOM_MOTOR_PORT = 13;
 
 // Intake motor ports
-const int LEFT_INTAKE_MOTOR_PORT = 4;
-const int RIGHT_INTAKE_MOTOR_PORT = 5;
+const int LEFT_INTAKE_MOTOR_PORT = 9;
+const int RIGHT_INTAKE_MOTOR_PORT = 2;
 
-const int IMU_PORT = 14; // Inertial Measurement Unit
+const int IMU_PORT = 8; // Inertial Measurement Unit
 
 // Note: If motors have r10 board,
 // do not go above 10,000mV and switch directions.
@@ -36,7 +36,7 @@ const double length = 10.5;
 const double width = 10.375;
 
 //The diameter of the wheel
-const double diameter = 4.1;
+const double diameter = 4.0;
 
 //The amount the left side needs to catch up to the right
 const double offset = 1.00;
@@ -60,6 +60,8 @@ pros::Motor_Group intake_group({ left_intake_motor, right_intake_motor });
 // Inertial Sensor
 pros::Imu imu_sensor(IMU_PORT);
 
+// Pneumatic Piston
+pros::ADIDigitalOut piston ('A');
 
 /******************************************************************************************************
  * 
@@ -82,29 +84,34 @@ void move_encoder(double voltage, double diameter, double distance) {
 }
 
 /**
- * This function is used to move the robot a certain distance using the motor's built in encoders.
+ * This function is used to move the robot a certain distance using the motor's built-in encoders.
  * 
  * @param voltage: The voltage that the motors will be set to.
  * @param diameter: The diameter of the wheel.
  * @param distance: The distance that the robot will move.
+ * @param forward: If true, the robot will move forward; if false, it will move backward.
  */
-void move(int voltage, double distance) {
-	// need to delay on start up
-	double left_middle = left_middle_motor.get_position();
-	double right_middle = right_middle_motor.get_position();
-	double average = 0;
+void move(int voltage, double diameter, double distance, bool forward) {
+    // need to delay on start up
+    double left_middle = left_middle_motor.get_position();
+    double right_middle = right_middle_motor.get_position();
+    double average = 0;
 
-	while(abs(average) < distance / (pi * diameter)) {
-		double lm_dif = left_middle_motor.get_position() - left_middle;
-		double rm_dif = right_middle_motor.get_position() - right_middle;
-		average = (lm_dif + rm_dif) / 2;
-		
-		left_group.move_voltage(voltage * offset);
-		right_group.move_voltage(voltage);
-	}
-	left_group.brake();
-	right_group.brake();
+    int directionFactor = forward ? 1 : -1; // 1 for forward, -1 for backward
+
+    while (abs(average) < distance / (pi * diameter)) {
+        double lm_dif = left_middle_motor.get_position() - left_middle;
+        double rm_dif = right_middle_motor.get_position() - right_middle;
+        average = (lm_dif + rm_dif) / 2;
+
+        left_group.move_voltage(voltage * offset * directionFactor);
+        right_group.move_voltage(voltage * directionFactor);
+    }
+
+    left_group.brake();
+    right_group.brake();
 }
+
 
 /**
  * This function is used to turn the robot a certain amount of degrees using the inertial sensor.
@@ -203,6 +210,7 @@ void interpolate_motor_voltage(pros::Motor_Group& motor_group, std::int32_t targ
 
 void initialize() {
 	pros::lcd::initialize();
+	pros::ADIDigitalOut piston ('A', false);
 	left_group.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 	right_group.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 }
@@ -229,12 +237,13 @@ void autonomous() {
 	 * Repeat steps 6 and 7 until all triballs are dispensed
 	 * End autonomous
 	 */
-	move(6000, 38.5);
-	turn_imu(3000, -90);
-	move(6000, 44);
-	turn_imu(3000, 90);
-	move(6000, 2);
+	// move(6000, 38.5);
+	// turn_imu(3000, -90);
+	// move(6000, 44);
+	// turn_imu(3000, 90);
+	// move(6000, 2);
 
+	move(6000, diameter, 38.5, false);
 }
 
 void opcontrol() {
@@ -295,16 +304,26 @@ void opcontrol() {
 			// LCD display for debugging
 			pros::lcd::print(0, "%d %d %d", static_cast<int>(angle), static_cast<int>(voltage_x), static_cast<int>(voltage_y));
 		}
+
 		// Intake control
-		if (master.get_digital(DIGITAL_L1)) { // Forward
+		if (master.get_digital(DIGITAL_R1)) { // Intake
 			intake_group.move_voltage(MAX_VOLTAGE);
 		}
-		else if (master.get_digital(DIGITAL_R1)) { // Reverse
+		else if (master.get_digital(DIGITAL_L1)) { // Release
 			intake_group.move_voltage(-MAX_VOLTAGE);
 		}
 		else {
 			intake_group.move_voltage(0);
 		}
+
+		// Piston control
+		if (master.get_digital(DIGITAL_L2)) {
+			piston.set_value(true);
+		}
+		else if (master.get_digital(DIGITAL_R2)){
+			piston.set_value(false);
+		}
+
 		pros::delay(20); // Delay for loop iteration
 	}
 }
