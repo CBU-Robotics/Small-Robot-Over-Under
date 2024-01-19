@@ -81,6 +81,8 @@ void move(int voltage, double distance) {
 		right_group.move_voltage(voltage);
 		v = left_middle_motor.get_position();
 	}
+	left_group.brake();
+	right_group.brake();
 }
 
 /**
