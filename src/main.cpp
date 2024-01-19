@@ -244,9 +244,11 @@ void autonomous() {
 	// move(6000, 2);
 
 	move(5000, diameter, 36.25, true);
-	turn_imu(2000, -85);
-	move(5000, diameter, 38, true);
-	turn_imu(2000, 90);
+	turn_imu(3000, -85);
+	move(5000, diameter, 29, true);
+	move(2000, diameter, 8, true);
+	turn_imu(3000, 95);
+	move(4000, diameter, 5, true);
 	// move(6000, diameter, 2, true);
 }
 
