@@ -43,14 +43,14 @@ const double offset = 1.00;
 
 // Controller and motor setup
 pros::Controller master(pros::E_CONTROLLER_MASTER);
-pros::Motor left_top_motor(LEFT_TOP_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_ROTATIONS);
-pros::Motor left_middle_motor(LEFT_Middle_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_ROTATIONS);
-pros::Motor left_bottom_motor(LEFT_BOTTOM_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_ROTATIONS);
-pros::Motor right_top_motor(RIGHT_TOP_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_ROTATIONS);
-pros::Motor right_middle_motor(RIGHT_Middle_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_ROTATIONS);
-pros::Motor right_bottom_motor(RIGHT_BOTTOM_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_ROTATIONS);
-pros::Motor left_intake_motor(LEFT_INTAKE_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_ROTATIONS);
-pros::Motor right_intake_motor(RIGHT_INTAKE_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_ROTATIONS);
+pros::Motor left_top_motor(LEFT_TOP_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_DEGREES);
+pros::Motor left_middle_motor(LEFT_Middle_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_DEGREES);
+pros::Motor left_bottom_motor(LEFT_BOTTOM_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_DEGREES);
+pros::Motor right_top_motor(RIGHT_TOP_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_DEGREES);
+pros::Motor right_middle_motor(RIGHT_Middle_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_DEGREES);
+pros::Motor right_bottom_motor(RIGHT_BOTTOM_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_DEGREES);
+pros::Motor left_intake_motor(LEFT_INTAKE_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, MOTOR_ENCODER_DEGREES);
+pros::Motor right_intake_motor(RIGHT_INTAKE_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, MOTOR_ENCODER_DEGREES);
 
 // Motor groups and brake modes
 pros::Motor_Group left_group({ left_top_motor, left_middle_motor, left_bottom_motor });
@@ -65,11 +65,11 @@ pros::ADIDigitalOut piston ('A');
 
 
 double dabs(double v) {
-	return v < 0 : -v : v;
+	return v < 0.0 ? -v : v;
 }
 
 double to_radians(double degrees) {
-	return PI * degrees / 180.;
+	return pi * degrees / 180.;
 }
 
 void move_encoder(int voltage, double distance) {
@@ -236,19 +236,14 @@ void autonomous() {
 	 * Repeat steps 6 and 7 until all triballs are dispensed
 	 * End autonomous
 	 */
-	// move(6000, 38.5);
-	// turn_imu(3000, -90);
-	// move(6000, 44);
-	// turn_imu(3000, 90);
-	// move(6000, 2);
-
-	move(5000, diameter, 36.25, true);
-	turn_imu(3000, -85);
-	move(5000, diameter, 29, true);
-	move(2000, diameter, 8, true);
-	turn_imu(3000, 95);
-	move(4000, diameter, 5, true);
-	// move(6000, diameter, 2, true);
+	
+	move_encoder(5000, 36.25);
+	// turn_imu(3000, -85);
+	// move(5000, diameter, 29);
+	// move(2000, diameter, 8);
+	// turn_imu(3000, 95);
+	// move(4000, diameter, 5);
+	// // move(6000, diameter, 2, true);
 }
 
 void opcontrol() {
