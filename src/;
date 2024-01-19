@@ -36,7 +36,7 @@ const double length = 10.5;
 const double width = 10.375;
 
 //The diameter of the wheel
-const double diameter = 3.917;
+const double diameter = 4.0;
 
 //The amount the left side needs to catch up to the right
 const double offset = 1.00;
@@ -63,26 +63,32 @@ pros::Imu imu_sensor(IMU_PORT);
 // Pneumatic Piston
 pros::ADIDigitalOut piston ('A');
 
+/******************************************************************************************************
+ * 
+ * This code was intended to be used with a shaft encoder, but we did not implement one into our robot.
+ * 
+ *****************************************************************************************************/ 
+// Shaft Encoder
+// pros::ADIEncoder encoder ('A', 'B', MOTOR_ENCODER_ROTATIONS);
 
-double dabs(double v) {
-	return v < 0 : -v : v;
-}
+// void move_encoder(double voltage, double diameter, double distance) {
+// 	// Note: need to delay on start up or else it will not work
+// 	encoder.reset();
 
-double to_radians(double degrees) {
-	return PI * degrees / 180.;
-}
+// 	while((abs((int)encoder.get_value())) < distance / (diameter * pi)) {
+// 		left_group.move_voltage(voltage);
+// 		right_group.move_voltage(voltage);
+// 	}
+// 	left_group.brake();
+// 	right_group.brake();
+// }
 
 void move_encoder(int voltage, double distance) {
-	double v = left_middle_motor.get_position(); // if this is degrees
-	const double iv = v;
-	const double r = diameter / 2.;
-	while (dabs((iv - v) * r) < distance) {
-		left_group.move_voltage(voltage);
-		right_group.move_voltage(voltage);
+	int v = encoder.get_value();
+	const int iv = v;
+	while (v * diameter < distance) {
 	}
 }
-
-
 
 /**
  * This function is used to move the robot a certain distance using the motor's built-in encoders.
@@ -243,11 +249,9 @@ void autonomous() {
 	// move(6000, 2);
 
 	move(5000, diameter, 36.25, true);
-	turn_imu(3000, -85);
-	move(5000, diameter, 29, true);
-	move(2000, diameter, 8, true);
-	turn_imu(3000, 95);
-	move(4000, diameter, 5, true);
+	turn_imu(2000, -85);
+	move(5000, diameter, 38, true);
+	turn_imu(2000, 90);
 	// move(6000, diameter, 2, true);
 }
 
