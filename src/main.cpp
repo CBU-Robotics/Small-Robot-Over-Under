@@ -77,6 +77,7 @@ void move_encoder(int voltage, double distance) {
 	const double iv = v;
 	const double r = diameter / 2.;
 	while (dabs((iv - v) * r) < distance) {
+		pros::lcd::print(0, "%d %d %d", iv, v, r); 
 		left_group.move_voltage(voltage);
 		right_group.move_voltage(voltage);
 	}
