@@ -114,7 +114,7 @@ void turn(int voltage, double rotation) {
 }
 
 void initialize() {
-	pros::lcd::initialize();
+	//pros::lcd::initialize();
 	pros::ADIDigitalOut piston ('A', false);
 	left_group.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 	right_group.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
@@ -122,7 +122,7 @@ void initialize() {
 
 void punchIt() {
 	// intake_group.move_relative(-450, 200);
-	pros::delay(1000);
+	// pros::delay(1000);
 	move(-5000, 5);
 	int flag = true;
 
@@ -131,7 +131,7 @@ void punchIt() {
 		pros::delay(1000);
 		flag = false;
 	}
-	
+	// 1s
 	pros::delay(1000);
 
 	//move forward
@@ -174,14 +174,14 @@ void autonomous() {
 	
 	move(-5000, 39);
 	turn(3000, 87.5);
-	move(5000, 44);
+	move(5000, 45.5);
 	turn(3000, 90);
 	intake_group.move_voltage(-12000);
 
 	for (int i = 0; i < 11; i++) {
-		punchIt();
+		punchIt(); //3000ms
 		unPunchIt();
-		pros::delay(5000);
+		pros::delay(6000);
 	}
 }
 
@@ -198,7 +198,7 @@ void opcontrol() {
 			// interpolate_motor_voltage(right_group, 0);
 			left_group.move_voltage(0);
 			right_group.move_voltage(0);
-			pros::lcd::print(0, "%d %d %d", 0, 0, 0); // LCD display
+			//pros::lcd::print(0, "%d %d %d", 0, 0, 0); // LCD display
 		}
 		else {
 			// Calculate magnitude based on normalized x and y
