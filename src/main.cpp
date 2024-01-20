@@ -76,7 +76,7 @@ void move(int voltage, double distance) {
 	double v = left_middle_motor.get_position(); // if this is degrees
 	const double iv = v;
 	const double r = diameter / 2.;
-	while (dabs((iv - v) * r) < distance) {
+	while (dabs(to_radians(iv - v) * r) < distance) {
 		left_group.move_voltage(voltage);
 		right_group.move_voltage(voltage);
 		v = left_middle_motor.get_position();
