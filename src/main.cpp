@@ -93,27 +93,22 @@ void move(int voltage, double distance) {
  * @param rotation: The amount of degrees that the robot will turn.
  */
 void turn(int voltage, int rotation) {
-	// need to delay on start up
-	double left_middle = left_middle_motor.get_position();
-	double right_middle = right_middle_motor.get_position();
-	double average = 0;
+    int initialIntertialRotation = (int) imu_sensor.get_rotation();
 
-	if (rotation < 0) {
-		voltage = -voltage;
-		rotation = -rotation;
+	rotation *= 0.84;
+
+	if (rotation > 0) {
+		while ((int) imu_sensor.get_rotation() - initialIntertialRotation < rotation) {
+			right_group.move_voltage(-voltage);
+			left_group.move_voltage(voltage);
+		}
+	} else {
+		while ((int) imu_sensor.get_rotation() - initialIntertialRotation > rotation) {
+			right_group.move_voltage(voltage);
+			left_group.move_voltage(-voltage);
+		}
 	}
 
-	//double distance = (rotation * pi * ((length * length) + (width * width))) / (720 * length);
-	double distance = (rotation * pi * length) / 360;
-
-	while(fabs(average) < (distance / (pi * diameter))) {
-		double lm_dif = left_middle_motor.get_position() - left_middle;
-		double rm_dif = right_middle_motor.get_position() - right_middle;
-		average = (fabs(lm_dif) + fabs(rm_dif)) / 2;
-		
-		left_group.move_voltage(voltage);
-		right_group.move_voltage(-voltage);
-	}
 	left_group.brake();
 	right_group.brake();
 }
@@ -148,8 +143,8 @@ void autonomous() {
 	 * End autonomous
 	 */
 	
-	move(5000, 36.25);
-	// turn_imu(3000, -85);
+	// move(5000, 36.25);
+	turn(3000, -85);
 	// move(5000, diameter, 29);
 	// move(2000, diameter, 8);
 	// turn_imu(3000, 95);
