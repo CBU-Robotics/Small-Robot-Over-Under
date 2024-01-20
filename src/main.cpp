@@ -121,7 +121,7 @@ void initialize() {
 }
 
 void punchIt() {
-	intake_group.move_relative(-450, 200);
+	// intake_group.move_relative(-450, 200);
 	pros::delay(1000);
 	move(-5000, 5);
 	int flag = true;
@@ -146,7 +146,7 @@ void unPunchIt() {
 	turn(3000, 5); // Left shift adjust
 	move(-5000, 3);
 	piston.set_value(false);
-	intake_group.move_relative(100, 200);
+	// intake_group.move_relative(100, 200);
 }
 
 void disabled() {}
@@ -176,18 +176,13 @@ void autonomous() {
 	turn(3000, 87.5);
 	move(5000, 44);
 	turn(3000, 90);
+	intake_group.move_voltage(-12000);
 
 	for (int i = 0; i < 11; i++) {
 		punchIt();
 		unPunchIt();
 		pros::delay(5000);
 	}
-
-	// move(5000, diameter, 29);
-	// move(2000, diameter, 8);
-	// turn_imu(3000, 95);
-	// move(4000, diameter, 5);
-	// // move(6000, diameter, 2, true);
 }
 
 void opcontrol() {
