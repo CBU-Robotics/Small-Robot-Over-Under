@@ -120,6 +120,51 @@ void initialize() {
 	right_group.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 }
 
+void punchIt() {
+	intake_group.move_relative(-100, 200);
+	pros::delay(1000);
+	move(-5000, 5);
+	int flag = true;
+	
+	while (flag) {
+		piston.set_value(true);
+		pros::delay(1000);
+		flag = false;
+	}
+	
+	pros::delay(1000);
+
+	//move forward
+	left_group.move_voltage(5000);
+	right_group.move_voltage(5000);
+	pros::delay(1000);
+	left_group.brake();
+	right_group.brake();
+
+	move(-5000, 10);
+
+	left_group.move_voltage(5000);
+	right_group.move_voltage(5000);
+	pros::delay(1000);
+	left_group.brake();
+	right_group.brake();
+
+	move(-5000, 10);
+
+	left_group.move_voltage(5000);
+	right_group.move_voltage(5000);
+	pros::delay(1000);
+	left_group.brake();
+	right_group.brake();
+
+}
+
+void unPunchIt() {
+	move(-5000, 10);
+	piston.set_value(false);
+	intake_group.move_relative(100, 200);
+}
+
 void disabled() {}
 
 void competition_initialize() {}
@@ -143,11 +188,15 @@ void autonomous() {
 	 * End autonomous
 	 */
 	
-	move(5000, 39);
-	turn(3000, -87.5);
+	move(-5000, 39);
+	turn(3000, 87.5);
 	move(5000, 44);
 	turn(3000, 90);
-	move(5000, 5);
+
+	punchIt();
+
+	unPunchIt();
+
 	// move(5000, diameter, 29);
 	// move(2000, diameter, 8);
 	// turn_imu(3000, 95);
