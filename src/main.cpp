@@ -121,11 +121,11 @@ void initialize() {
 }
 
 void punchIt() {
-	intake_group.move_relative(-100, 200);
+	intake_group.move_relative(-450, 200);
 	pros::delay(1000);
 	move(-5000, 5);
 	int flag = true;
-	
+
 	while (flag) {
 		piston.set_value(true);
 		pros::delay(1000);
@@ -140,27 +140,17 @@ void punchIt() {
 	pros::delay(1000);
 	left_group.brake();
 	right_group.brake();
-
-	move(-5000, 10);
-
+	turn(3000, 5);
+	
 	left_group.move_voltage(5000);
 	right_group.move_voltage(5000);
 	pros::delay(1000);
 	left_group.brake();
 	right_group.brake();
-
-	move(-5000, 10);
-
-	left_group.move_voltage(5000);
-	right_group.move_voltage(5000);
-	pros::delay(1000);
-	left_group.brake();
-	right_group.brake();
-
 }
 
 void unPunchIt() {
-	move(-5000, 10);
+	move(-5000, 3);
 	piston.set_value(false);
 	intake_group.move_relative(100, 200);
 }
