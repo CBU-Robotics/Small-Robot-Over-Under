@@ -92,18 +92,18 @@ void move(int voltage, double distance) {
  * @param voltage: The voltage that the motors will be set to.
  * @param rotation: The amount of degrees that the robot will turn.
  */
-void turn(int voltage, int rotation) {
-    int initialIntertialRotation = (int) imu_sensor.get_rotation();
+void turn(int voltage, double rotation) {
+    double initialIntertialRotation = imu_sensor.get_rotation();
 
 	rotation *= 0.84;
 
 	if (rotation > 0) {
-		while ((int) imu_sensor.get_rotation() - initialIntertialRotation < rotation) {
+		while (imu_sensor.get_rotation() - initialIntertialRotation < rotation) {
 			right_group.move_voltage(-voltage);
 			left_group.move_voltage(voltage);
 		}
 	} else {
-		while ((int) imu_sensor.get_rotation() - initialIntertialRotation > rotation) {
+		while (imu_sensor.get_rotation() - initialIntertialRotation > rotation) {
 			right_group.move_voltage(voltage);
 			left_group.move_voltage(-voltage);
 		}
@@ -143,8 +143,11 @@ void autonomous() {
 	 * End autonomous
 	 */
 	
-	// move(5000, 36.25);
-	turn(3000, -85);
+	move(5000, 39);
+	turn(3000, -87.5);
+	move(5000, 44);
+	turn(3000, 90);
+	move(5000, 5);
 	// move(5000, diameter, 29);
 	// move(2000, diameter, 8);
 	// turn_imu(3000, 95);
