@@ -140,16 +140,10 @@ void punchIt() {
 	pros::delay(1000);
 	left_group.brake();
 	right_group.brake();
-	turn(3000, 5);
-	
-	left_group.move_voltage(5000);
-	right_group.move_voltage(5000);
-	pros::delay(1000);
-	left_group.brake();
-	right_group.brake();
 }
 
 void unPunchIt() {
+	turn(3000, 5); // Left shift adjust
 	move(-5000, 3);
 	piston.set_value(false);
 	intake_group.move_relative(100, 200);
@@ -183,9 +177,11 @@ void autonomous() {
 	move(5000, 44);
 	turn(3000, 90);
 
-	punchIt();
-
-	unPunchIt();
+	for (int i = 0; i < 11; i++) {
+		punchIt();
+		unPunchIt();
+		pros::delay(5000);
+	}
 
 	// move(5000, diameter, 29);
 	// move(2000, diameter, 8);
