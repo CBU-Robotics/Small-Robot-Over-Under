@@ -181,7 +181,7 @@ void autonomous() {
 	for (int i = 0; i < 11; i++) {
 		punchIt(); //3000ms
 		unPunchIt();
-		pros::delay(6000);
+		pros::delay(5000);
 	}
 }
 
