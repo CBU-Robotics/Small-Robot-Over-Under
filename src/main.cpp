@@ -18,7 +18,7 @@ const int RIGHT_BACK_WHEEL_PORT = 13;
 const int LEFT_INTAKE_MOTOR_PORT = 10;
 const int RIGHT_INTAKE_MOTOR_PORT = 2;
 
-const int IMU_PORT = 8; // Inertial Measurement Unit
+const int IMU_PORT = 3; // Inertial Measurement Unit
 
 // Note: If motors have r10 board,
 // do not go above 10,000mV and switch directions.
@@ -149,6 +149,29 @@ void unPunchIt() {
 	// intake_group.move_relative(100, 200);
 }
 
+void pushPull() {
+	intake_group.move_relative(90, 100);
+
+	pros::delay(500);
+	piston.set_value(false);
+
+	move(-2000, 5);
+
+	left_group.move_voltage(10000);
+	right_group.move_voltage(10000);
+	pros::delay(500);
+	left_group.brake();
+	right_group.brake();
+
+	piston.set_value(true);
+
+	intake_group.move_relative(-90, 100);
+
+	pros::delay(500);
+
+	intake_group.move_relative(90, 100);
+}
+
 void disabled() {}
 
 void competition_initialize() {}
@@ -176,12 +199,10 @@ void autonomous() {
 	turn(3000, 87.5);
 	move(5000, 45.5);
 	turn(3000, 90);
-	intake_group.move_voltage(-12000);
 
+	piston.set_value(true);
 	for (int i = 0; i < 11; i++) {
-		punchIt(); //3000ms
-		unPunchIt();
-		pros::delay(5000);
+		pushPull();
 	}
 }
 
