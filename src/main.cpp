@@ -15,7 +15,7 @@ const int RIGHT_MIDDLE_WHEEL_PORT = 11; // Solid/Tracking Wheel
 const int RIGHT_BACK_WHEEL_PORT = 13;
 
 // Intake motor ports
-const int LEFT_INTAKE_MOTOR_PORT = 10;
+const int LEFT_INTAKE_MOTOR_PORT = 9;
 const int RIGHT_INTAKE_MOTOR_PORT = 2;
 
 const int IMU_PORT = 3; // Inertial Measurement Unit
@@ -115,7 +115,7 @@ void turn(int voltage, double rotation) {
 
 void initialize() {
 	//pros::lcd::initialize();
-	pros::ADIDigitalOut piston ('A', false);
+	pros::ADIDigitalOut piston ('A', true);
 	left_group.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 	right_group.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 }
@@ -167,7 +167,7 @@ void pushPull() {
 
 	intake_group.move_relative(-90, 100);
 
-	pros::delay(500);
+	pros::delay(2000);
 
 	intake_group.move_relative(90, 100);
 }
@@ -181,26 +181,14 @@ void autonomous() {
 	 * Dimensions Note: 
 	 * the robot's dimensions are about from center of wheel to center of wheel 10.5 x 10 and 3/8 inches.
 	 * Real dimensions are 14.5 x 13 inches.
-	 * 
-	 * TODO: Map out and write the autonomous instructions. Below is work in progress and subject to change.
-	 * The autonomous instructions should fufill the following:
-	 * 1. Move forward 44 inches
-	 * 2. Pivot 90 degrees left
-	 * 3. Move forward 47 inches
-	 * 4. Pivot 90 degrees right
-	 * 5. Dispense the pre-loaded triball into goal
-	 * 6. Delay until next triball is caught from other robots catapult throw
-	 * 7. Dispense the triball into goal
-	 * Repeat steps 6 and 7 until all triballs are dispensed
-	 * End autonomous
 	 */
 	
-	move(-5000, 39);
-	turn(3000, 87.5);
-	move(5000, 45.5);
+	move(-5000, 40);
+	turn(3000, 85);
+	move(5000, 43);
 	turn(3000, 90);
-
 	piston.set_value(true);
+	intake_group.move_relative(-180, 200);
 	for (int i = 0; i < 11; i++) {
 		pushPull();
 	}
@@ -254,10 +242,10 @@ void opcontrol() {
 		}
 
 		// Piston control
-		if (master.get_digital(DIGITAL_L2)) {
+		if (master.get_digital(DIGITAL_R2)) {
 			piston.set_value(true);
 		}
-		else if (master.get_digital(DIGITAL_R2)){
+		else if (master.get_digital(DIGITAL_L2)){
 			piston.set_value(false);
 		}
 
