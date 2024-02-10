@@ -7,15 +7,15 @@
 */
 
 // Drivetrain motor ports
-const int LEFT_TOP_MOTOR_PORT = 19;
-const int LEFT_Middle_MOTOR_PORT = 20; // Middle Wheel
-const int LEFT_BOTTOM_MOTOR_PORT = 18;
-const int RIGHT_TOP_MOTOR_PORT = 12;
-const int RIGHT_Middle_MOTOR_PORT = 11; // Middle Wheel
-const int RIGHT_BOTTOM_MOTOR_PORT = 13;
+const int LEFT_FRONT_WHEEL_PORT = 19;
+const int LEFT_MIDDLE_WHEEL_PORT = 20; // Solid/Tracking Wheel
+const int LEFT_BACK_WHEEL_PORT = 18;
+const int RIGHT_FRONT_WHEEL_PORT = 12;
+const int RIGHT_MIDDLE_WHEEL_PORT = 11; // Solid/Tracking Wheel
+const int RIGHT_BACK_WHEEL_PORT = 13;
 
 // Intake motor ports
-const int LEFT_INTAKE_MOTOR_PORT = 9;
+const int LEFT_INTAKE_MOTOR_PORT = 10;
 const int RIGHT_INTAKE_MOTOR_PORT = 2;
 
 const int IMU_PORT = 8; // Inertial Measurement Unit
@@ -24,7 +24,7 @@ const int IMU_PORT = 8; // Inertial Measurement Unit
 // do not go above 10,000mV and switch directions.
 // We are trying to return and replace those motors.
 const int VEX_MAX_VOLTAGE = 12000;
-const int MAX_VOLTAGE = VEX_MAX_VOLTAGE - 0;
+const int MAX_VOLTAGE = VEX_MAX_VOLTAGE - 0; // Use if you want to limit the potential voltage
 const int ANALOG_MAX_VALUE = 127;
 const double INTERPOLATION_MAGNITUDE = 0.01;
 const int INTERPOLATION_ERROR = 30;
@@ -43,16 +43,16 @@ const double offset = 1.00;
 
 // Controller and motor setup
 pros::Controller master(pros::E_CONTROLLER_MASTER);
-pros::Motor left_top_motor(LEFT_TOP_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor left_middle_motor(LEFT_Middle_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor left_bottom_motor(LEFT_BOTTOM_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor right_top_motor(RIGHT_TOP_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor right_middle_motor(RIGHT_Middle_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
-pros::Motor right_bottom_motor(RIGHT_BOTTOM_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor left_top_motor(LEFT_FRONT_WHEEL_PORT, pros::E_MOTOR_GEAR_200, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor left_middle_motor(LEFT_MIDDLE_WHEEL_PORT, pros::E_MOTOR_GEAR_200, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor left_bottom_motor(LEFT_BACK_WHEEL_PORT, pros::E_MOTOR_GEAR_200, false, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor right_top_motor(RIGHT_FRONT_WHEEL_PORT, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor right_middle_motor(RIGHT_MIDDLE_WHEEL_PORT, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
+pros::Motor right_bottom_motor(RIGHT_BACK_WHEEL_PORT, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor left_intake_motor(LEFT_INTAKE_MOTOR_PORT, pros::E_MOTOR_GEAR_200, false, pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor right_intake_motor(RIGHT_INTAKE_MOTOR_PORT, pros::E_MOTOR_GEAR_200, true, pros::E_MOTOR_ENCODER_DEGREES);
 
-// Motor groups and brake modes
+// Motor groups
 pros::Motor_Group left_group({ left_top_motor, left_middle_motor, left_bottom_motor });
 pros::Motor_Group right_group({ right_top_motor, right_middle_motor, right_bottom_motor });
 pros::Motor_Group intake_group({ left_intake_motor, right_intake_motor });
@@ -228,6 +228,7 @@ void opcontrol() {
 			intake_group.move_voltage(-MAX_VOLTAGE);
 		}
 		else {
+			//Potentially change to move to absolute position if button is not being pressed
 			intake_group.move_voltage(0);
 		}
 
