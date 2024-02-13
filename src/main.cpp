@@ -150,10 +150,10 @@ void unPunchIt() {
 }
 
 void pushPull() {
-	intake_group.move_relative(90, 100);
+	intake_group.move_relative(-990, 100);
 
 	pros::delay(500);
-	piston.set_value(false);
+	piston.set_value(false); //punch
 
 	move(-2000, 5);
 
@@ -163,13 +163,13 @@ void pushPull() {
 	left_group.brake();
 	right_group.brake();
 
-	piston.set_value(true);
+	piston.set_value(true); //retrack
 
-	intake_group.move_relative(-90, 100);
+	intake_group.move_relative(-90, 100); //shut flood gate
 
-	pros::delay(2000);
+	pros::delay(2000); // catch
 
-	intake_group.move_relative(90, 100);
+	intake_group.move_relative(90, 100); // open flood gate
 }
 
 void disabled() {}
@@ -185,10 +185,11 @@ void autonomous() {
 	
 	move(-5000, 40);
 	turn(3000, 85);
-	move(5000, 43);
+	move(5000, 45.5);
 	turn(3000, 90);
 	piston.set_value(true);
 	intake_group.move_relative(-180, 200);
+	pros::delay(500);
 	for (int i = 0; i < 11; i++) {
 		pushPull();
 	}
@@ -242,10 +243,10 @@ void opcontrol() {
 		}
 
 		// Piston control
-		if (master.get_digital(DIGITAL_R2)) {
+		if (master.get_digital(DIGITAL_L2)) {
 			piston.set_value(true);
 		}
-		else if (master.get_digital(DIGITAL_L2)){
+		else if (master.get_digital(DIGITAL_R2)){
 			piston.set_value(false);
 		}
 
