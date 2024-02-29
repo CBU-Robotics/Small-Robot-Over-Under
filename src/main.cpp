@@ -120,61 +120,31 @@ void initialize() {
 	right_group.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 }
 
-void punchIt() {
-	// intake_group.move_relative(-450, 200);
-	// pros::delay(1000);
-	move(-5000, 5);
-	int flag = true;
-
-	while (flag) {
-		piston.set_value(true);
-		pros::delay(1000);
-		flag = false;
-	}
-	// 1s
-	pros::delay(1000);
-
-	//move forward
-	left_group.move_voltage(5000);
-	right_group.move_voltage(5000);
-	pros::delay(1000);
-	left_group.brake();
-	right_group.brake();
-}
-
-void unPunchIt() {
-	turn(3000, 5); // Left shift adjust
-	move(-5000, 3);
-	piston.set_value(false);
-	// intake_group.move_relative(100, 200);
-}
-
 void pushPull() {
 	intake_group.move_relative(-990, 100);
-
-	pros::delay(500);
-	piston.set_value(false); //punch
-
+	piston.set_value(false); // Punch
+	// Back Up
 	move(-2000, 5);
-
-	left_group.move_voltage(10000);
-	right_group.move_voltage(10000);
-	pros::delay(500);
+	//Ram
+	left_group.move_voltage(8000);
+	right_group.move_voltage(8000);
+	piston.set_value(true); // Retrack
+	pros::delay(250);
 	left_group.brake();
 	right_group.brake();
-
-	piston.set_value(true); //retrack
-
 	intake_group.move_relative(-90, 100); //shut flood gate
-
-	pros::delay(2000); // catch
-
+	pros::delay(750); // catch (2000ms on skills before new intake)
 	intake_group.move_relative(90, 100); // open flood gate
 }
 
 void disabled() {}
 
-void competition_initialize() {}
+void competition_initialize() {
+	intake_group.move_absolute(0, 100); // Moves 100 units forward
+	while (!((intake_group.get_positions().at(0) < 5) && (intake_group.get_positions().at(0) > -5))) {
+		pros::delay(5);
+	}
+}
 
 void autonomous() {
 	/**
@@ -183,14 +153,14 @@ void autonomous() {
 	 * Real dimensions are 14.5 x 13 inches.
 	 */
 	
-	move(-5000, 40);
-	turn(3000, 85);
-	move(5000, 45.5);
+	move(-9500, 40);
+	turn(3000, 75);
+	move(12000, 43.5);
 	turn(3000, 90);
 	piston.set_value(true);
 	intake_group.move_relative(-180, 200);
 	pros::delay(500);
-	for (int i = 0; i < 11; i++) {
+	for (int i = 0; i < 20; i++) {
 		pushPull();
 	}
 }
@@ -232,10 +202,10 @@ void opcontrol() {
 
 		// Intake control
 		if (master.get_digital(DIGITAL_R1)) { // Intake
-			intake_group.move_voltage(MAX_VOLTAGE);
+			intake_group.move_voltage(9000);
 		}
 		else if (master.get_digital(DIGITAL_L1)) { // Release
-			intake_group.move_voltage(-MAX_VOLTAGE);
+			intake_group.move_voltage(-9000);
 		}
 		else {
 			//Potentially change to move to absolute position if button is not being pressed
