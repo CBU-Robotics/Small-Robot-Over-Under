@@ -129,11 +129,11 @@ void pushPull() {
 	left_group.move_voltage(8000);
 	right_group.move_voltage(8000);
 	piston.set_value(true); // Retrack
-	pros::delay(250);
+	pros::delay(500); // 250ms delay is not enough to reach net consistently. Change to 500ms
 	left_group.brake();
 	right_group.brake();
 	intake_group.move_relative(-90, 100); //shut flood gate
-	pros::delay(750); // catch (2000ms on skills before new intake)
+	pros::delay(500); // catch (2000ms on skills before new intake)
 	intake_group.move_relative(90, 100); // open flood gate
 }
 
@@ -202,10 +202,10 @@ void opcontrol() {
 
 		// Intake control
 		if (master.get_digital(DIGITAL_R1)) { // Intake
-			intake_group.move_voltage(9000);
+			intake_group.move_voltage(6500);
 		}
 		else if (master.get_digital(DIGITAL_L1)) { // Release
-			intake_group.move_voltage(-9000);
+			intake_group.move_voltage(-6500);
 		}
 		else {
 			//Potentially change to move to absolute position if button is not being pressed
