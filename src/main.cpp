@@ -41,6 +41,10 @@ const double diameter = 3.917;
 //The amount the left side needs to catch up to the right
 const double offset = 1.00;
 
+// Global timer
+int current_time = 0;
+int last_time = 0;
+
 // Controller and motor setup
 pros::Controller master(pros::E_CONTROLLER_MASTER);
 pros::Motor left_top_motor(LEFT_FRONT_WHEEL_PORT, pros::E_MOTOR_GEAR_200, false, pros::E_MOTOR_ENCODER_DEGREES);
@@ -62,6 +66,18 @@ pros::Imu imu_sensor(IMU_PORT);
 
 // Pneumatic Piston
 pros::ADIDigitalOut piston ('A');
+
+// Global timer
+double start_time;
+double current_time;
+
+void delay(int time) {
+  current_time = start_time;
+  while (current_time - start_time < time) {
+    current_time = pros::millis();
+  }
+  start_time += time;
+}
 
 
 double dabs(double v) {
@@ -129,11 +145,11 @@ void pushPull() {
 	left_group.move_voltage(8000);
 	right_group.move_voltage(8000);
 	piston.set_value(true); // Retrack
-	pros::delay(500); // 250ms delay is not enough to reach net consistently. Change to 500ms
+	delay(1250); // Catch (Was 500)
 	left_group.brake();
 	right_group.brake();
 	intake_group.move_relative(-90, 100); //shut flood gate
-	pros::delay(500); // catch (2000ms on skills before new intake)
+	delay(500);
 	intake_group.move_relative(90, 100); // open flood gate
 }
 
@@ -142,24 +158,19 @@ void disabled() {}
 void competition_initialize() {
 	intake_group.move_absolute(0, 100); // Moves 100 units forward
 	while (!((intake_group.get_positions().at(0) < 5) && (intake_group.get_positions().at(0) > -5))) {
-		pros::delay(5);
+		delay(5);
 	}
 }
 
 void autonomous() {
-	/**
-	 * Dimensions Note: 
-	 * the robot's dimensions are about from center of wheel to center of wheel 10.5 x 10 and 3/8 inches.
-	 * Real dimensions are 14.5 x 13 inches.
-	 */
-	
+	start_time = pros::millis();
 	move(-9500, 40);
 	turn(3000, 75);
 	move(12000, 43.5);
 	turn(3000, 90);
 	piston.set_value(true);
 	intake_group.move_relative(-180, 200);
-	pros::delay(500);
+	delay(500);
 	for (int i = 0; i < 20; i++) {
 		pushPull();
 	}
@@ -220,6 +231,6 @@ void opcontrol() {
 			piston.set_value(false);
 		}
 
-		pros::delay(20); // Delay for loop iteration
+		delay(20); // Delay for loop iteration
 	}
 }
