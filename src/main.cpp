@@ -130,7 +130,7 @@ void pushPull() {
 	intake_group.move_relative(-990, 100);
 	piston.set_value(false); // Punch
 	// Back Up
-	pros::delay(100);
+	pros::delay(150);
 	move(-2000, 5);
 	//Ram
 	left_group.move_voltage(8000);
