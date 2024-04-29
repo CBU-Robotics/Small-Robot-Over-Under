@@ -42,7 +42,6 @@ const double diameter = 3.917;
 const double offset = 1.00;
 
 // Global timer
-int current_time = 0;
 int last_time = 0;
 
 // Controller and motor setup
@@ -70,15 +69,6 @@ pros::ADIDigitalOut piston ('A');
 // Global timer
 double start_time;
 double current_time;
-
-void delay(int time) {
-  current_time = start_time;
-  while (current_time - start_time < time) {
-    current_time = pros::millis();
-  }
-  start_time += time;
-}
-
 
 double dabs(double v) {
 	return v < 0.0 ? -v : v;
@@ -145,11 +135,11 @@ void pushPull() {
 	left_group.move_voltage(8000);
 	right_group.move_voltage(8000);
 	piston.set_value(true); // Retrack
-	delay(1250); // Catch (Was 500)
+	pros::delay(1250); // Catch (Was 500)
 	left_group.brake();
 	right_group.brake();
 	intake_group.move_relative(-90, 100); //shut flood gate
-	delay(500);
+	pros::delay(500);
 	intake_group.move_relative(90, 100); // open flood gate
 }
 
@@ -158,19 +148,19 @@ void disabled() {}
 void competition_initialize() {
 	intake_group.move_absolute(0, 100); // Moves 100 units forward
 	while (!((intake_group.get_positions().at(0) < 5) && (intake_group.get_positions().at(0) > -5))) {
-		delay(5);
+		pros::delay(5);
 	}
 }
 
 void autonomous() {
 	start_time = pros::millis();
-	move(-9500, 40);
-	turn(3000, 75);
+	move(-9500, 40.5);
+	turn(3000, 77);
 	move(12000, 43.5);
 	turn(3000, 90);
 	piston.set_value(true);
 	intake_group.move_relative(-180, 200);
-	delay(500);
+	pros::delay(500);
 	for (int i = 0; i < 20; i++) {
 		pushPull();
 	}
@@ -231,6 +221,6 @@ void opcontrol() {
 			piston.set_value(false);
 		}
 
-		delay(20); // Delay for loop iteration
+		pros::delay(20); // pros::delay for loop iteration
 	}
 }
